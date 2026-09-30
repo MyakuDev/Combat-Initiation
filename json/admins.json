@@ -1,0 +1,28 @@
+﻿{
+    "meta": {"format": "v2"},
+    "admins": [
+        {"name": "NullSights", "userId": 240800665, "role": "Lead Developer"},
+        {"name": "F2Gift", "userId": 1447409159, "role": "Tester"},
+        {"name": "77sapato", "userId": 348855220, "role": "Administrator"},
+        {"name": "vel", "userId": 4492091455, "role": "Contributor"},
+        {"name": "ofa", "userId": 4696436, "role": "Administrator"},
+        {"name": "CyanStigmata", "userId": 1975450441, "role": "Administrator"},
+        {"name": "Hit0master101", "role": "Administrator (alt of Cyan)"},
+        {"name": "chr2stina", "userId": 7013975978, "role": "Administrator"},
+        {"name": "JakeSights", "userId": 386219771, "role": "Administrator"},
+        {"name": "bog", "userId": 386219771, "role": "Administrator"},
+        {"name": "V1CTOR", "userId": 7247383691, "role": "Administrator"},
+        {"name": "pag5ni", "userId": 8424074921, "role": "Administrator"},
+        {"name": "Helicixity", "userId": 89318267, "role": "Administrator"},
+        {"name": "0fgail", "userId": 2980319695, "role": "Administrator"},
+        {"name": "xAltrive", "userId": 203556764, "role": "Administrator"},
+        {"name": "AbsoluteScary", "userId": 143851429, "role": "Administrator"},
+        {"name": "SCHADEVREUGDE", "userId": 175157829, "role": "Community Manager"},
+        {"name": "DewbyDoppler", "userId": 85691477, "role": "Developer"},
+        {"name": "AydenSebastian", "userId": 85691477, "role": "Developer"},
+        {"name": "Truffle", "userId": 1182798858, "role": "Administrator"},
+        {"name": "n11wc", "userId": 276307286, "role": "Administrator"},
+        {"name": "Boen", "userId": 83075074, "role": "Administrator"},
+        {"name": "Viper", "userId": 834460465, "role": "Administrator"}
+    ]
+}
