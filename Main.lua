@@ -1,4 +1,4 @@
--- ============================================================
+﻿-- ============================================================
 -- Combat Initiation - Main
 -- ============================================================
 
@@ -97,7 +97,7 @@ log("Boot", "LocalPlayer: " .. LocalPlayer.Name .. " (" .. LocalPlayer.UserId ..
 local ROOT = ".../"
 local CONFIG_PATH = ROOT .. "configs/config.json"
 local JSON_ROOT = ROOT .. "json/"
-local WHITELIST_URL = "[URL]"
+local WHITELIST_URL = "https://raw.githubusercontent.com/MyakuDev/Combat-Initiation/refs/heads/main/json/whitelist.json"
 
 log("Config", "Root path: " .. ROOT)
 log("Config", "Whitelist URL: " .. WHITELIST_URL)
@@ -1510,3 +1510,4 @@ log("Boot", "Whitelisted users loaded: " .. (function()
 end)())
 log("Boot", "Whitelisted groups loaded: " .. #whitelistedGroups)
 log("Boot", "Ready.")
+
