@@ -19,7 +19,7 @@ _G.Combat = {
     FreezeRay     = {Enabled = false, Distance = 500, Speed = 0.1, Charged = true},
     AutoFreezeRay = {Enabled = false, Distance = 500, Speed = 0.1},
     SuperBall     = {Enabled = false, Speed = 0.1},
-    Umbrella      = {Enabled = false, Speed = 0.1},
+    AutoUmbrella  = {Enabled = false, MinFallTime = 0.3, Cooldown = 0.5},
     ZombieStaff   = {Enabled = false, Distance = 500, Speed = 0.1},
     DamageEvent   = {Enabled = false, Distance = 500, Speed = 0.1},
     Firebrand     = {Enabled = false, Distance = 500, Speed = 0.1},
@@ -32,7 +32,7 @@ _G.Combat = {
     ModDetect     = {Enabled = true, KickMethod = "kick"},
     EnemyTracker  = {Enabled = true, Debug = true},
     AutoConfig    = {Enabled = true},
-    Blink         = {Enabled = true, Key = Enum.KeyCode.LeftShift, Distance = 25, Speed = 0.15, Cooldown = 0.5},
+    Blink         = {Enabled = true, Key = Enum.KeyCode.LeftShift, Distance = 25, Speed = 0.15, Cooldown = 0.5, HoldMode = true},
 }
 local Combat = _G.Combat
 
@@ -43,7 +43,7 @@ local ShieldBypass  = Combat.ShieldBypass
 local FreezeRay     = Combat.FreezeRay
 local AutoFreezeRay = Combat.AutoFreezeRay
 local SuperBall     = Combat.SuperBall
-local Umbrella      = Combat.Umbrella
+local AutoUmbrella  = Combat.AutoUmbrella
 local ZombieStaff   = Combat.ZombieStaff
 local DamageEvent   = Combat.DamageEvent
 local Firebrand     = Combat.Firebrand
@@ -76,8 +76,9 @@ end
 
 --
 
-local BlinkRunning = false
 local BlinkLastTick = 0
+local BlinkHeld = false
+local BlinkTween = nil
 
 local function getMoveDirection()
     local hum = getHum()
@@ -101,22 +102,37 @@ local function doBlink()
     local dir = getMoveDirection()
     if not dir then return end
     BlinkLastTick = tick()
-    BlinkRunning = true
     local startCf = hrp.CFrame
     local endCf = CFrame.new(hrp.Position + dir * Blink.Distance) * (startCf - startCf.Position)
-    local tween = TweenService:Create(
+    if BlinkTween then BlinkTween:Cancel() end
+    BlinkTween = TweenService:Create(
         hrp,
         TweenInfo.new(Blink.Speed, Enum.EasingStyle.Linear, Enum.EasingDirection.Out),
         {CFrame = endCf}
     )
-    tween:Play()
-    tween.Completed:Connect(function() BlinkRunning = false end)
+    BlinkTween:Play()
 end
 
 UserInputService.InputBegan:Connect(function(input, gp)
     if gp then return end
     if not Blink.Enabled then return end
-    if input.KeyCode == Blink.Key then doBlink() end
+    if input.KeyCode == Blink.Key then
+        BlinkHeld = true
+        if not Blink.HoldMode then doBlink() end
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input, gp)
+    if input.KeyCode == Blink.Key then
+        BlinkHeld = false
+    end
+end)
+
+RunService.Heartbeat:Connect(function()
+    if not Blink.Enabled then return end
+    if not Blink.HoldMode then return end
+    if not BlinkHeld then return end
+    doBlink()
 end)
 
 --
@@ -519,11 +535,54 @@ local function fireUmbrella()
     pcall(function() ev:FireServer(true) end)
 end
 
+local UmbrellaLastFire = 0
+local UmbrellaFallStart = 0
+local UmbrellaWasFalling = false
+
+RunService.Heartbeat:Connect(function()
+    if not AutoUmbrella.Enabled then
+        UmbrellaWasFalling = false
+        UmbrellaFallStart = 0
+        return
+    end
+
+    local hum = getHum()
+    if not hum then return end
+
+    local state = hum:GetState()
+    local falling = state == Enum.HumanoidStateType.Freefall
+        or state == Enum.HumanoidStateType.FallingDown
+        or state == Enum.HumanoidStateType.PlatformStanding
+
+    if falling and not UmbrellaWasFalling then
+        UmbrellaWasFalling = true
+        UmbrellaFallStart = tick()
+    elseif not falling then
+        UmbrellaWasFalling = false
+        UmbrellaFallStart = 0
+    end
+
+    if falling and UmbrellaWasFalling then
+        local fallDuration = tick() - UmbrellaFallStart
+        if fallDuration >= AutoUmbrella.MinFallTime then
+            if tick() - UmbrellaLastFire >= AutoUmbrella.Cooldown then
+                UmbrellaLastFire = tick()
+                pcall(fireUmbrella)
+            end
+        end
+    end
+end)
+
 task.spawn(function()
     while true do
-        task.wait(Umbrella.Speed)
-        if not Umbrella.Enabled then continue end
-        pcall(fireUmbrella)
+        task.wait(AutoUmbrella.Cooldown)
+        if not AutoUmbrella.Enabled then continue end
+        local hum = getHum()
+        if not hum then continue end
+        local state = hum:GetState()
+        if state == Enum.HumanoidStateType.Freefall or state == Enum.HumanoidStateType.FallingDown then
+            pcall(fireUmbrella)
+        end
     end
 end)
 
@@ -802,8 +861,7 @@ RunService.Heartbeat:Connect(function()
             flyBV.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
             flyBV.Parent = hrp
         end
-        if not flyBG or flyBG.Parent ~= hrp then
-            flyBG = Instance.new("BodyGyro")
+        if not flyBG or flyBG.Parent ~= hrp then            flyBG = Instance.new("BodyGyro")
             flyBG.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
             flyBG.P = 1000
             flyBG.D = 50
@@ -911,8 +969,9 @@ Tools:slider({Name="Auto Freeze Ray Speed",Min=0.01,Max=2,Default=0.1,Decimals=2
 Tools:toggle({Name="Super Ball",Default=false,Callback=function(s) SuperBall.Enabled = s end})
 Tools:slider({Name="Super Ball Speed",Min=0.01,Max=2,Default=0.1,Decimals=2,Callback=function(v) SuperBall.Speed = v end})
 
-Tools:toggle({Name="Umbrella",Default=false,Callback=function(s) Umbrella.Enabled = s end})
-Tools:slider({Name="Umbrella Speed",Min=0.01,Max=2,Default=0.1,Decimals=2,Callback=function(v) Umbrella.Speed = v end})
+Tools:toggle({Name="Auto Umbrella",Description="fires when you enter a falling state",Default=false,Callback=function(s) AutoUmbrella.Enabled = s end})
+Tools:slider({Name="Umbrella Min Fall Time",Description="seconds of falling before firing",Min=0,Max=2,Default=0.3,Decimals=2,Callback=function(v) AutoUmbrella.MinFallTime = v end})
+Tools:slider({Name="Umbrella Cooldown",Min=0.1,Max=3,Default=0.5,Decimals=2,Callback=function(v) AutoUmbrella.Cooldown = v end})
 
 Tools:toggle({Name="Zombie Staff",Default=false,Callback=function(s) ZombieStaff.Enabled = s end})
 Tools:slider({Name="Zombie Staff Distance",Min=10,Max=2000,Default=500,Callback=function(v) ZombieStaff.Distance = v end})
@@ -946,6 +1005,7 @@ Misc:toggle({Name="Fly",Default=false,Callback=function(s) Fly.Enabled = s end})
 Misc:slider({Name="Fly Speed",Min=10,Max=500,Default=50,Callback=function(v) Fly.Speed = v end})
 
 Misc:toggle({Name="Blink",Default=true,Callback=function(s) Blink.Enabled = s end})
+Misc:toggle({Name="Blink Hold Mode",Default=true,Callback=function(s) Blink.HoldMode = s end})
 Misc:slider({Name="Blink Distance",Min=5,Max=100,Default=25,Callback=function(v) Blink.Distance = v end})
 Misc:slider({Name="Blink Speed",Min=0.05,Max=1,Default=0.15,Decimals=2,Callback=function(v) Blink.Speed = v end})
 Misc:slider({Name="Blink Cooldown",Min=0.1,Max=3,Default=0.5,Decimals=2,Callback=function(v) Blink.Cooldown = v end})
