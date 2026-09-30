@@ -11,7 +11,7 @@ local HttpService = game:GetService("HttpService")
 local TweenService = game:GetService("TweenService")
 local LocalPlayer = Players.LocalPlayer
 
-_G.Combat = _G.Combat or {
+_G.Combat = {
     KillAll       = {Enabled = false, Distance = 500, Speed = 0.1, Delay = 0.05, MaxPerTick = 5, HitParts = {"Head", "HumanoidRootPart"}},
     KillAura      = {Enabled = false, Distance = 25, Speed = 0.1, Delay = 0.05, MaxPerTick = 3, HitParts = {"Head", "HumanoidRootPart"}},
     AutoTowel     = {Enabled = false, Range = 50, Distance = 10},
@@ -82,10 +82,8 @@ local BlinkLastTick = 0
 local function getMoveDirection()
     local hum = getHum()
     if not hum then return nil end
-
     local moveVec = hum.MoveDirection
     if moveVec.Magnitude > 0 then return moveVec.Unit end
-
     local cam = workspace.CurrentCamera
     local dir = Vector3.zero
     if UserInputService:IsKeyDown(Enum.KeyCode.W) then dir += cam.CFrame.LookVector end
@@ -100,33 +98,25 @@ local function doBlink()
     local hrp = getHrp()
     if not hrp then return end
     if tick() - BlinkLastTick < Blink.Cooldown then return end
-
     local dir = getMoveDirection()
     if not dir then return end
-
     BlinkLastTick = tick()
     BlinkRunning = true
-
     local startCf = hrp.CFrame
     local endCf = CFrame.new(hrp.Position + dir * Blink.Distance) * (startCf - startCf.Position)
-
     local tween = TweenService:Create(
         hrp,
         TweenInfo.new(Blink.Speed, Enum.EasingStyle.Linear, Enum.EasingDirection.Out),
         {CFrame = endCf}
     )
     tween:Play()
-    tween.Completed:Connect(function()
-        BlinkRunning = false
-    end)
+    tween.Completed:Connect(function() BlinkRunning = false end)
 end
 
 UserInputService.InputBegan:Connect(function(input, gp)
     if gp then return end
     if not Blink.Enabled then return end
-    if input.KeyCode == Blink.Key then
-        doBlink()
-    end
+    if input.KeyCode == Blink.Key then doBlink() end
 end)
 
 --
@@ -140,10 +130,6 @@ local Config = {
     DetectedLimbNames = {},
     DetectedEnemyData = {},
 }
-
-local function log(...)
-    if AutoConfig.Enabled then print("[AutoConfig]", ...) end
-end
 
 local function verifyGame()
     if not AutoConfig.Enabled then return end
@@ -241,7 +227,6 @@ local function scanTools()
     if bp then for _, t in ipairs(bp:GetChildren()) do check(t) end end
     local char = getChar()
     if char then for _, t in ipairs(char:GetChildren()) do check(t) end end
-
     if AutoConfig.Enabled then
         print("[AutoConfig] Tools scanned:")
         for name, info in pairs(Config.DetectedTools) do
@@ -253,10 +238,8 @@ scanTools()
 
 local function applyAutoConfig()
     if not AutoConfig.Enabled then return end
-
     if Config.DetectedLimbNames then
-        local hasCenter = false
-        local hasHead = false
+        local hasCenter, hasHead = false, false
         for _, name in ipairs(Config.DetectedLimbNames) do
             if name == "Center" then hasCenter = true end
             if name == "Head" then hasHead = true end
@@ -271,7 +254,6 @@ local function applyAutoConfig()
             print("[AutoConfig] Hit parts set to: Head, HumanoidRootPart")
         end
     end
-
     print("[AutoConfig] Configuration applied.")
 end
 applyAutoConfig()
