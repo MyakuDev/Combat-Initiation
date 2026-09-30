@@ -1,0 +1,8 @@
+﻿{
+    "meta": {"format": "v2", "description": "combat initiation main config"},
+    "lastLoaded": 0,
+    "theme": "Serika",
+    "menuKey": "Z",
+    "notifications": true,
+    "autoLoad": true
+}

@@ -1,0 +1,14 @@
+﻿{
+    "meta": {"name": "legit", "description": "stealth preset"},
+    "features": {
+        "KillAll":      {"Enabled": false, "State": "Disabled"},
+        "KillAura":     {"Enabled": false, "State": "Disabled"},
+        "FreezeRay":    {"Enabled": false, "State": "Disabled"},
+        "AutoFreezeRay":{"Enabled": false, "State": "Disabled"},
+        "Slingshot":    {"Enabled": false, "State": "Disabled"},
+        "AutoSlingshot":{"Enabled": false, "State": "Disabled"},
+        "AutoUmbrella": {"Enabled": true,  "State": "Enabled"},
+        "Speed":        {"Enabled": false, "State": "Disabled"},
+        "Blink":        {"Enabled": true,  "State": "Enabled", "Distance": 10, "Cooldown": 1}
+    }
+}

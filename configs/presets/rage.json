@@ -1,0 +1,13 @@
+﻿{
+    "meta": {"name": "rage", "description": "everything on"},
+    "features": {
+        "KillAll":      {"Enabled": true, "State": "Enabled", "Distance": 2000},
+        "KillAura":     {"Enabled": true, "State": "Enabled", "Distance": 50},
+        "FreezeRay":    {"Enabled": true, "State": "Enabled", "Charged": true},
+        "AutoFreezeRay":{"Enabled": true, "State": "Enabled"},
+        "Slingshot":    {"Enabled": true, "State": "Enabled"},
+        "AutoSlingshot":{"Enabled": true, "State": "Enabled"},
+        "Firebrand":    {"Enabled": true, "State": "Enabled"},
+        "Blink":        {"Enabled": true, "State": "Enabled", "Distance": 50, "Cooldown": 0.1}
+    }
+}
